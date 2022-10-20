@@ -4,6 +4,7 @@ authors = ["Maximilien DI DIO <mdidio@pm.me>"]
 version = "0.1.0"
 edition = "2021"
 description = "Unofficial rust client for neutrinoapi.com"
+keywords = ["neutrinoapi", "client", "api"]
 repository = "https://github.com/Diskyver/neutral"
 
 license-file = "LICENSE"
