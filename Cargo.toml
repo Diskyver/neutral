@@ -1,6 +1,6 @@
 [package]
 name = "neutral"
-authors = ["Maximilien DI DIO <mdidio@diskyver.com>"]
+authors = ["Maximilien DI DIO <mdidio@pm.me>"]
 version = "0.1.0"
 edition = "2021"
 description = "Unofficial rust client for neutrinoapi.com"
