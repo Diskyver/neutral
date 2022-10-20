@@ -1,7 +1,7 @@
 # neutral - unofficial rust client for neutrinoapi.com
 
 [![crate.io-badge](https://img.shields.io/badge/crate.io-neutral-blue)](https://crates.io/crates/neutral)
-[![Rust](https://github.com/Diskyver/neutrinoapi/actions/workflows/rust.yaml/badge.svg)](https://github.com/Diskyver/neutrinoapi/actions/workflows/rust.yaml)
+[![Rust](https://github.com/Diskyver/neutral/actions/workflows/rust.yaml/badge.svg)](https://github.com/Diskyver/neutral/actions/workflows/rust.yaml)
 
 Provide an API to interact with some features provided by [neutrinoapi.com](https://www.neutrinoapi.com).
 
