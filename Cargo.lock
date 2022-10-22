@@ -517,7 +517,7 @@ dependencies = [
 
 [[package]]
 name = "neutral"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "assert_approx_eq",
  "futures",
