@@ -19,19 +19,21 @@
 
 use http::{
     uri::{Authority, Scheme},
-    StatusCode, Uri,
+    Uri,
 };
+
 use hyper::{client::HttpConnector, header::HeaderValue, Client, Request};
 use hyper_tls::HttpsConnector;
 use serde::{Deserialize, Deserializer, Serialize};
-use snafu::{ResultExt, Snafu};
-use tokio::time::error::Elapsed;
 
+pub mod error;
 pub mod hlr_lookup;
 pub mod ip_blocklist;
 pub mod ip_info;
 pub mod ip_probe;
 pub mod phone_validate;
+
+use crate::error::Error;
 
 #[cfg(test)]
 use mockito;
@@ -79,48 +81,6 @@ pub struct NeutrinoSensor {
     pub id: usize,
     pub blocklist: String,
     pub description: String,
-}
-
-/// Global Error of this crate.
-#[derive(Debug, Snafu)]
-#[snafu(visibility(pub))]
-pub enum Error {
-    #[snafu(display("Hyper: {}", source))]
-    Hyper { source: hyper::Error },
-    #[snafu(display("Http: {}", source))]
-    Http {
-        source: hyper::http::Error,
-        status_code: StatusCode,
-    },
-    #[snafu(display("Json: {}", source))]
-    Json { source: serde_json::error::Error },
-    #[snafu(display("Timeout: {}", source))]
-    TimeOut { source: Elapsed },
-    #[snafu(display("{}", error))]
-    NeutrinoAPI {
-        status_code: StatusCode,
-        error: String,
-    },
-    #[snafu(display("{}", source))]
-    InvalidUri { source: http::uri::InvalidUri },
-    #[snafu(display("{}", msg))]
-    NetworkScheme { msg: String },
-}
-
-impl Serialize for Error {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        let display = self.to_string();
-
-        #[derive(Serialize)]
-        struct ErrorAux {
-            error: String,
-        }
-
-        ErrorAux { error: display }.serialize(serializer)
-    }
 }
 
 pub(crate) fn object_empty_as_none<'de, D, T>(deserializer: D) -> Result<Option<T>, D::Error>
@@ -181,7 +141,7 @@ impl<'a> Neutral<'a> {
         #[cfg(test)]
         let uri = &mockito::server_url();
 
-        let uri = uri.parse::<Uri>().context(InvalidUriSnafu)?;
+        let uri = uri.parse::<Uri>()?;
 
         https.https_only(uri.scheme() == Some(&Scheme::HTTPS));
 
@@ -225,13 +185,7 @@ impl<'a> Neutral<'a> {
         &self,
         path_and_query: String,
     ) -> Result<http::request::Builder, Error> {
-        let uri = self
-            .uri_builder()
-            .path_and_query(path_and_query)
-            .build()
-            .context(HttpSnafu {
-                status_code: StatusCode::BAD_REQUEST,
-            })?;
+        let uri = self.uri_builder().path_and_query(path_and_query).build()?;
 
         Ok(Request::builder().uri(uri))
     }
