@@ -127,4 +127,4 @@ jobs:
 
       - name: perform cargo publish if the current crate version match with the pushed tag
         if: steps.cargo-publish.outputs.CRATE_VERSION == ${{ github.ref_name }}
-        run: cargo publish --dry-run && cargo publish
+        run: cargo publish --dry-run && cargo publish --token ${{ secrets.CARGO_TOKEN }}

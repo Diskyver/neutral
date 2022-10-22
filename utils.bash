@@ -5,7 +5,7 @@ function crate_version {
 
     for line in $(cat ./Cargo.toml); do
         if [[ $in_package -eq 3 ]]; then
-            echo "${line}" | tr '"' ' '
+            echo "${line}" | tr -d '"'
             return 0 
         fi
 
@@ -29,6 +29,6 @@ function crate_version {
 
 function release_version {
     local remote="${1:-origin}"
-    local version=$(crate_version)
-    git tag $(crate_version) && git push $remote $(crate)
+    local version="$(crate_version)"
+    git tag "${version}" && git push "${remote}" "${version}"
 }
