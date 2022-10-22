@@ -17,6 +17,6 @@ By example, ip info feature from neutrinoapi is implemented inside the [neutral:
 
 ```rust
 let api_auth = ApiAuth::new("userid", "apikey");
-let client = Neutral::try_new("https://neutrinoapi.net/ip-info", api_auth).unwrap();
+let client = Neutral::try_new("https://neutrinoapi.net", api_auth).unwrap();
 let ip_info_response = ip_info::send(&client, ip_addr).await.unwrap();
 ```
