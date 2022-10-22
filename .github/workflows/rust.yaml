@@ -102,3 +102,29 @@ jobs:
 
       - name: Cargo test release
         run: cargo test --release --all-features
+
+  # Run on tag pushed
+  cargo-publish:
+    runs-on: ubuntu-latest
+    needs: ["stable-tests"]
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: get current crate version
+        shell: bash
+        run: |
+          source ./utils.bash
+          echo "::set-output name=CRATE_VERSION::$(crate_version)"
+
+      - name: perform cargo publish if the current crate version match with the pushed tag
+        if: steps.cargo-publish.outputs.CRATE_VERSION == ${{ github.ref_name }}
+        run: cargo publish --dry-run && cargo publish
