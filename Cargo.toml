@@ -12,7 +12,6 @@ license-file = "LICENSE"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-snafu = "0.7.1"
 serde_json = "1"
 hyper-tls = "0.5"
 lazy_static = "1.4.0"

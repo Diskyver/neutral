@@ -5,11 +5,12 @@
 //!
 //! The home location register (HLR) is a central database that contains details of each mobile phone subscriber connected to the global mobile network. You can use this API to validate that a mobile number is live and registered on a mobile network in real-time. Find out the carrier name, ported number status and fetch up-to-date device status information.
 
-use crate::{Error, HttpSnafu, HyperSnafu, JsonSnafu, Neutral, PhoneInfoKind};
+use crate::{error::NeutrinoError, Neutral, PhoneInfoKind};
 use http::{Method, StatusCode};
 use hyper::Body;
 use serde::{Deserialize, Serialize};
-use snafu::ResultExt;
+
+use crate::error::Error;
 
 #[cfg(test)]
 use mockito;
@@ -68,31 +69,24 @@ pub async fn send(neutral: &Neutral<'_>, number: String) -> Result<HlrLookupResp
     let request = neutral
         .request_builder(path_and_query)?
         .method(Method::GET)
-        .body(Body::empty())
-        .context(HttpSnafu {
-            status_code: StatusCode::BAD_REQUEST,
-        })?;
+        .body(Body::empty())?;
 
     let client = &neutral.client;
     let request = neutral.add_authentication_headers(request);
 
-    let http_resp = client.request(request).await.context(HyperSnafu)?;
+    let http_resp = client.request(request).await?;
 
     match http_resp.status() {
         StatusCode::OK => {
-            let body = hyper::body::to_bytes(http_resp.into_body())
-                .await
-                .context(HyperSnafu)?;
-            let response: HlrLookupResponse = serde_json::from_slice(&body).context(JsonSnafu)?;
+            let body = hyper::body::to_bytes(http_resp.into_body()).await?;
+            let response: HlrLookupResponse = serde_json::from_slice(&body)?;
             Ok(response)
         }
         _ => {
             let status_code = http_resp.status();
-            let body = hyper::body::to_bytes(http_resp.into_body())
-                .await
-                .context(HyperSnafu)?;
+            let body = hyper::body::to_bytes(http_resp.into_body()).await?;
             let error = String::from_utf8_lossy(&body).into_owned();
-            Err(Error::NeutrinoAPI { status_code, error })
+            Err(Error::Neutrino(NeutrinoError { status_code, error }))
         }
     }
 }
