@@ -7,17 +7,17 @@
 Provide an API to interact with some features provided by [neutrinoapi.com](https://www.neutrinoapi.com).
 
 # What is neutrinoapi.com
-A general-purpose tool that solves recurring problems encountered during the development of software systems. It is used across many industries by software developers, data scientists and systems operators. 
+A general-purpose tool that solves recurring problems encountered during the development of software systems. It is used across many industries by software developers, data scientists and systems operators.
+
+# How to use the neutral crate ?
+The [Neutral](./struct.Neutral.html) structure act as an API client of neutrinoapi.
+Features are represented by modules, each module contains a struct which implement a `send` method to call neutrinoapi.com. Use an instance of [Neutral](./struct.Neutral.html) to interact with neutrinoapi.
 
 
-# How to use the neutral crate ? 
-The API is describe the the [Neutral](https://docs.rs/neutral/latest/neutral/struct.Neutral.html) structure. 
-Features are represented by module, each module contains a `send` function which call neutrinoapi.com using an instance of [Neutral](https://docs.rs/neutral/latest/neutral/struct.Neutral.html) structure.
-
-By example, ip info feature from neutrinoapi is implemented inside the [neutral::ip_info](https://docs.rs/neutral/latest/neutral/ip_info/index.html) module.
+Example for ip_info endpoint:
 
 ```rust
-let api_auth = ApiAuth::new("userid", "apikey");
-let client = Neutral::try_new("https://neutrinoapi.net", api_auth).unwrap();
-let ip_info_response = ip_info::send(&client, ip_addr).await.unwrap();
+let api_auth = ApiAuth::new("userid".to_string(), "apikey".to_string());
+let neutral = Neutral::try_new("https://neutrinoapi.net", api_auth).unwrap();
+let ip_info_response = neutral.ip_info().send(ip_addr).await.unwrap();
 ```
