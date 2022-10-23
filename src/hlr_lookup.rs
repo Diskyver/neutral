@@ -5,8 +5,8 @@
 //!
 //! The home location register (HLR) is a central database that contains details of each mobile phone subscriber connected to the global mobile network. You can use this API to validate that a mobile number is live and registered on a mobile network in real-time. Find out the carrier name, ported number status and fetch up-to-date device status information.
 
-use crate::{error::NeutrinoError, Neutral, PhoneInfoKind};
-use http::{Method, StatusCode};
+use crate::{Neutral, PhoneInfoKind};
+use http::Method;
 use hyper::Body;
 use serde::{Deserialize, Serialize};
 
@@ -60,34 +60,27 @@ pub struct HlrLookupResponse {
     pub local_number: String,
 }
 
-/// Send an hlr lookup request to neutrinoapi.com
-pub async fn send(neutral: &Neutral<'_>, number: String) -> Result<HlrLookupResponse, Error> {
-    let path_and_query = format!(
-        "/hlr-lookup?output-case=snake&number={}",
-        number.replace('+', "")
-    );
-    let request = neutral
-        .request_builder(path_and_query)?
-        .method(Method::GET)
-        .body(Body::empty())?;
+pub struct HlrLookup<'a> {
+    pub(crate) neutral: &'a Neutral,
+}
 
-    let client = &neutral.client;
-    let request = neutral.add_authentication_headers(request);
+impl<'a> HlrLookup<'a> {
+    /// Send an hlr lookup request to neutrinoapi.com
+    pub async fn send(&self, phone_number: String) -> Result<HlrLookupResponse, Error> {
+        let path_and_query = format!(
+            "/hlr-lookup?output-case=snake&number={}",
+            phone_number.replace('+', "")
+        );
 
-    let http_resp = client.request(request).await?;
+        let request = self
+            .neutral
+            .request_builder(path_and_query)?
+            .method(Method::GET)
+            .body(Body::empty())?;
 
-    match http_resp.status() {
-        StatusCode::OK => {
-            let body = hyper::body::to_bytes(http_resp.into_body()).await?;
-            let response: HlrLookupResponse = serde_json::from_slice(&body)?;
-            Ok(response)
-        }
-        _ => {
-            let status_code = http_resp.status();
-            let body = hyper::body::to_bytes(http_resp.into_body()).await?;
-            let error = String::from_utf8_lossy(&body).into_owned();
-            Err(Error::Neutrino(NeutrinoError { status_code, error }))
-        }
+        let body = self.neutral.request(request).await?;
+        let response: HlrLookupResponse = serde_json::from_slice(&body)?;
+        Ok(response)
     }
 }
 
@@ -178,12 +171,15 @@ mod test {
             expected: &expected_response,
         }];
 
-        let neutral =
-            Neutral::try_new(&mockito::server_url(), ApiAuth::new("User", "test")).unwrap();
+        let neutral = Neutral::try_new(
+            &mockito::server_url(),
+            ApiAuth::new("User".to_string(), "test".to_string().to_string()),
+        )
+        .unwrap();
 
         for test in &tests {
             let Args { phone_number } = &test.args;
-            let hlr_lookup_result = send(&neutral, phone_number.to_owned()).await;
+            let hlr_lookup_result = neutral.hlr_lookup().send(phone_number.to_owned()).await;
             let result = hlr_lookup_result.map(|hlr_lookup| hlr_lookup.clone());
             let expected = test.expected;
 

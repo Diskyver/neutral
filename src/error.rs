@@ -1,12 +1,17 @@
+//! # Contains error types
+//! Contains all different type of errors that could possibly happen.
+
 use http::StatusCode;
 use tokio::time::error::Elapsed;
 
+/// Represent a generic error from neutrinoapi.com.
 #[derive(Debug)]
 pub struct NeutrinoError {
     pub status_code: StatusCode,
     pub error: String,
 }
 
+/// Represent the to level error of the neutral crate.
 #[derive(Debug)]
 pub enum Error {
     Hyper(hyper::Error),

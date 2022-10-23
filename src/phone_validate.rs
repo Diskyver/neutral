@@ -5,14 +5,11 @@
 //!
 //! Use this API to validate local and international phone numbers in any country. You can determine the location of the number and also reformat the number into local and international dialing formats.
 
-use http::{Method, StatusCode};
+use http::Method;
 use hyper::Body;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    error::{Error, NeutrinoError},
-    Neutral, PhoneInfoKind,
-};
+use crate::{error::Error, Neutral, PhoneInfoKind};
 
 #[cfg(test)]
 use mockito;
@@ -36,38 +33,27 @@ pub struct PhoneValidateResponse {
     pub prefix_network: String,
 }
 
-/// Send an phone validate request to neutrinoapi.com
-pub async fn send(
-    neutral: &Neutral<'_>,
-    phone_number: String,
-) -> Result<PhoneValidateResponse, Error> {
-    let path_and_query = format!(
-        "/phone-validate?output-case=snake&number={}",
-        phone_number.replace('+', "")
-    );
+pub struct PhoneValidate<'a> {
+    pub(crate) neutral: &'a Neutral,
+}
 
-    let request = neutral
-        .request_builder(path_and_query)?
-        .method(Method::GET)
-        .body(Body::empty())?;
+impl<'a> PhoneValidate<'a> {
+    /// Send an phone validate request to neutrinoapi.com
+    pub async fn send(&self, phone_number: String) -> Result<PhoneValidateResponse, Error> {
+        let path_and_query = format!(
+            "/phone-validate?output-case=snake&number={}",
+            phone_number.replace('+', "")
+        );
 
-    let client = &neutral.client;
-    let request = neutral.add_authentication_headers(request);
+        let request = self
+            .neutral
+            .request_builder(path_and_query)?
+            .method(Method::GET)
+            .body(Body::empty())?;
 
-    let http_resp = client.request(request).await?;
-
-    match http_resp.status() {
-        StatusCode::OK => {
-            let body = hyper::body::to_bytes(http_resp.into_body()).await?;
-            let response: PhoneValidateResponse = serde_json::from_slice(&body)?;
-            Ok(response)
-        }
-        _ => {
-            let status_code = http_resp.status();
-            let body = hyper::body::to_bytes(http_resp.into_body()).await?;
-            let error = String::from_utf8_lossy(&body).into_owned();
-            Err(Error::Neutrino(NeutrinoError { status_code, error }))
-        }
+        let body = self.neutral.request(request).await?;
+        let response: PhoneValidateResponse = serde_json::from_slice(&body)?;
+        Ok(response)
     }
 }
 
@@ -144,12 +130,16 @@ mod test {
             },
         ];
 
-        let neutral =
-            Neutral::try_new(&mockito::server_url(), ApiAuth::new("user", "test")).unwrap();
+        let neutral = Neutral::try_new(
+            &mockito::server_url(),
+            ApiAuth::new("User".to_string(), "test".to_string()),
+        )
+        .unwrap();
 
         for test in &tests {
             let Args { phone_number } = &test.args;
-            let validate_phone_result = send(&neutral, phone_number.to_owned()).await;
+            let validate_phone_result =
+                neutral.phone_validate().send(phone_number.to_owned()).await;
             let phone_info_result = validate_phone_result.map(|phone_info| phone_info.clone());
             let expected = test.expected;
 

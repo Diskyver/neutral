@@ -4,15 +4,12 @@
 //!
 //! This API will run a series of live network scans and service probes to extract useful details about the host provider.
 
-use http::{Method, StatusCode};
+use http::Method;
 use hyper::Body;
 use serde::{Deserialize, Serialize};
 use std::net::IpAddr;
 
-use crate::{
-    error::{Error, NeutrinoError},
-    Neutral, NeutrinoProviderKind,
-};
+use crate::{error::Error, Neutral, NeutrinoProviderKind};
 
 #[cfg(test)]
 use mockito;
@@ -53,31 +50,23 @@ pub struct IpProbeResponse {
     pub is_v6: bool,
 }
 
-/// Send an ip probe request to neutrinoapi.com
-pub async fn send(neutral: &Neutral<'_>, ip_addr: IpAddr) -> Result<IpProbeResponse, Error> {
-    let path_and_query = format!("/ip-probe?output-case=snake&ip={}", ip_addr.to_string());
-    let request = neutral
-        .request_builder(path_and_query)?
-        .method(Method::GET)
-        .body(Body::empty())?;
+pub struct IpProbe<'a> {
+    pub(crate) neutral: &'a Neutral,
+}
 
-    let client = &neutral.client;
-    let request = neutral.add_authentication_headers(request);
+impl<'a> IpProbe<'a> {
+    /// Send an ip probe request to neutrinoapi.com
+    pub async fn send(&self, ip_addr: IpAddr) -> Result<IpProbeResponse, Error> {
+        let path_and_query = format!("/ip-probe?output-case=snake&ip={}", ip_addr.to_string());
+        let request = self
+            .neutral
+            .request_builder(path_and_query)?
+            .method(Method::GET)
+            .body(Body::empty())?;
 
-    let http_resp = client.request(request).await?;
-
-    match http_resp.status() {
-        StatusCode::OK => {
-            let body = hyper::body::to_bytes(http_resp.into_body()).await?;
-            let response: IpProbeResponse = serde_json::from_slice(&body)?;
-            Ok(response)
-        }
-        _ => {
-            let status_code = http_resp.status();
-            let body = hyper::body::to_bytes(http_resp.into_body()).await?;
-            let error = String::from_utf8_lossy(&body).into_owned();
-            Err(Error::Neutrino(NeutrinoError { status_code, error }))
-        }
+        let body = self.neutral.request(request).await?;
+        let response: IpProbeResponse = serde_json::from_slice(&body)?;
+        Ok(response)
     }
 }
 
@@ -184,12 +173,15 @@ mod test {
             expected: &expected_response,
         }];
 
-        let neutral =
-            Neutral::try_new(&mockito::server_url(), ApiAuth::new("User", "test")).unwrap();
+        let neutral = Neutral::try_new(
+            &mockito::server_url(),
+            ApiAuth::new("User".to_string(), "test".to_string()),
+        )
+        .unwrap();
 
         for test in &tests {
             let Args { ip_addr } = test.args;
-            let ip_probe_res = send(&neutral, ip_addr).await;
+            let ip_probe_res = neutral.ip_probe().send(ip_addr).await;
             let ip_probe_result = ip_probe_res.map(|ip_probe| ip_probe.clone());
             let expected = test.expected;
 

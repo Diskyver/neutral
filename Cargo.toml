@@ -1,7 +1,7 @@
 [package]
 name = "neutral"
 authors = ["Maximilien DI DIO <mdidio@pm.me>"]
-version = "0.2.2"
+version = "0.2.3"
 edition = "2021"
 description = "Unofficial rust client for neutrinoapi.com"
 keywords = ["neutrinoapi", "client", "api"]
@@ -20,6 +20,7 @@ mockito = "0.30.0"
 futures = "0.3.17"
 assert_approx_eq = "1.1.0"
 serde_with = "1.14.0"
+secrecy = "0.8.0"
 
 [dependencies.tokio]
 version = "1"
