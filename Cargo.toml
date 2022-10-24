@@ -6,8 +6,6 @@ edition = "2021"
 description = "Unofficial rust client for neutrinoapi.com"
 keywords = ["neutrinoapi", "client", "api"]
 repository = "https://github.com/Diskyver/neutral"
-
-license-file = "LICENSE"
 license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
