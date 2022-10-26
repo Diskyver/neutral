@@ -5,60 +5,15 @@
 //!
 //! The home location register (HLR) is a central database that contains details of each mobile phone subscriber connected to the global mobile network. You can use this API to validate that a mobile number is live and registered on a mobile network in real-time. Find out the carrier name, ported number status and fetch up-to-date device status information.
 
-use crate::{Neutral, PhoneInfoKind};
+use crate::Neutral;
 use http::Method;
 use hyper::Body;
-use serde::{Deserialize, Serialize};
+use neutral_types::hlr_lookup::HlrLookupResponse;
 
 use crate::error::Error;
 
 #[cfg(test)]
 use mockito;
-
-/// Describes Hlr Status from Hrl lookup API
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
-#[serde(rename_all(deserialize = "kebab-case", serialize = "kebab-case"))]
-pub enum HlrStatus {
-    Ok,
-    Absent,
-    Unknown,
-    Invalid,
-    FixedLine,
-    Voip,
-    Failed,
-}
-
-/// Response of hlr lookup neutrinoapi.com endpoint
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub struct HlrLookupResponse {
-    #[serde(rename(deserialize = "number_valid"))]
-    pub is_valid: bool,
-    #[serde(rename(deserialize = "hlr_valid"))]
-    pub is_hlr_valid: bool,
-    pub hlr_status: HlrStatus,
-    pub is_mobile: bool,
-    pub is_ported: bool,
-    pub is_roaming: bool,
-    pub imsi: String,
-    pub mcc: String,
-    pub mnc: String,
-    pub msin: String,
-    pub msc: String,
-    pub current_network: String,
-    pub origin_network: String,
-    pub ported_network: String,
-    #[serde(rename(deserialize = "number_type"))]
-    pub kind: PhoneInfoKind,
-    pub location: String,
-    pub country: String,
-    pub country_code: String,
-    pub country_code3: String,
-    pub currency_code: String,
-    pub roaming_country_code: String,
-    pub international_calling_code: String,
-    pub international_number: String,
-    pub local_number: String,
-}
 
 pub struct HlrLookup<'a> {
     pub(crate) neutral: &'a Neutral,
@@ -89,6 +44,7 @@ mod test {
     use super::*;
     use crate::ApiAuth;
     use mockito::{mock, Matcher};
+    use neutral_types::{hlr_lookup::HlrStatus, PhoneInfoKind};
 
     #[tokio::test]
     async fn test_hlr_lookup_with_good_phone_number() {

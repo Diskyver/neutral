@@ -514,11 +514,23 @@ dependencies = [
  "hyper-tls",
  "lazy_static",
  "mockito",
+ "neutral_types",
  "secrecy",
  "serde",
  "serde_json",
  "serde_with",
  "tokio",
+]
+
+[[package]]
+name = "neutral_types"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "01a47eedd42bdca913e85b5329de53a5a29ada324d98cadb6c0f3091a2eb971a"
+dependencies = [
+ "serde",
+ "serde_json",
+ "serde_with",
 ]
 
 [[package]]
