@@ -7,31 +7,12 @@
 
 use http::Method;
 use hyper::Body;
-use serde::{Deserialize, Serialize};
+use neutral_types::phone_validate::PhoneValidateResponse;
 
-use crate::{error::Error, Neutral, PhoneInfoKind};
+use crate::{error::Error, Neutral};
 
 #[cfg(test)]
 use mockito;
-
-/// Response of phone validate neutrinoapi.com endpoint
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub struct PhoneValidateResponse {
-    #[serde(alias = "valid", alias = "is_valid")]
-    pub is_valid: bool,
-    #[serde(alias = "type", alias = "kind")]
-    pub kind: PhoneInfoKind,
-    pub international_calling_code: String,
-    pub international_number: String,
-    pub local_number: String,
-    pub location: String,
-    pub country: String,
-    pub country_code: String,
-    pub country_code3: String,
-    pub currency_code: String,
-    pub is_mobile: bool,
-    pub prefix_network: String,
-}
 
 pub struct PhoneValidate<'a> {
     pub(crate) neutral: &'a Neutral,
@@ -62,6 +43,7 @@ mod test {
     use super::*;
     use crate::ApiAuth;
     use mockito::{mock, Matcher};
+    use neutral_types::PhoneInfoKind;
 
     #[tokio::test]
     async fn test_phone_validate_with_good_phone_number() {
