@@ -9,7 +9,7 @@ use hyper::Body;
 use neutral_types::ip_probe::IpProbeResponse;
 use std::net::IpAddr;
 
-use crate::{error::Error, Neutral};
+use crate::{Error, Neutral};
 
 #[cfg(test)]
 use mockito;

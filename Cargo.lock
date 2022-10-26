@@ -524,13 +524,16 @@ dependencies = [
 
 [[package]]
 name = "neutral_types"
-version = "0.1.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "01a47eedd42bdca913e85b5329de53a5a29ada324d98cadb6c0f3091a2eb971a"
+checksum = "596b393c49c3bfd0e034d7645115623f21ad9ca0bf04dc4279c5edf76a4c979c"
 dependencies = [
+ "http",
+ "hyper",
  "serde",
  "serde_json",
  "serde_with",
+ "tokio",
 ]
 
 [[package]]

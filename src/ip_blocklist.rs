@@ -23,13 +23,11 @@
 //! * Exploit scanners
 //! * Brute-force crackers
 
-use crate::Neutral;
+use crate::{Error, Neutral};
 use http::Method;
 use hyper::Body;
 use neutral_types::ip_blocklist::IpBlocklistResponse;
 use std::net::IpAddr;
-
-use crate::error::Error;
 
 #[cfg(test)]
 use mockito;

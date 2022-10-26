@@ -5,12 +5,10 @@
 //!
 //! The home location register (HLR) is a central database that contains details of each mobile phone subscriber connected to the global mobile network. You can use this API to validate that a mobile number is live and registered on a mobile network in real-time. Find out the carrier name, ported number status and fetch up-to-date device status information.
 
-use crate::Neutral;
+use crate::{Error, Neutral};
 use http::Method;
 use hyper::Body;
 use neutral_types::hlr_lookup::HlrLookupResponse;
-
-use crate::error::Error;
 
 #[cfg(test)]
 use mockito;

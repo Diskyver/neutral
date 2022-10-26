@@ -17,12 +17,12 @@
 //! let ip_info_response = neutral.ip_info().send(ip_addr).await.unwrap();
 //! ```
 
-use error::NeutrinoError;
 use hlr_lookup::HlrLookup;
 use http::{
     uri::{Authority, Scheme},
     StatusCode, Uri,
 };
+use neutral_types::error::{Error, NeutrinoError};
 
 use hyper::{body::Bytes, client::HttpConnector, Body, Client, Request};
 use hyper_tls::HttpsConnector;
@@ -32,14 +32,11 @@ use ip_probe::IpProbe;
 use phone_validate::PhoneValidate;
 use secrecy::{ExposeSecret, Secret};
 
-pub mod error;
 pub mod hlr_lookup;
 pub mod ip_blocklist;
 pub mod ip_info;
 pub mod ip_probe;
 pub mod phone_validate;
-
-use crate::error::Error;
 
 #[cfg(test)]
 use mockito;

@@ -9,7 +9,7 @@ use http::Method;
 use hyper::Body;
 use neutral_types::phone_validate::PhoneValidateResponse;
 
-use crate::{error::Error, Neutral};
+use crate::{Error, Neutral};
 
 #[cfg(test)]
 use mockito;

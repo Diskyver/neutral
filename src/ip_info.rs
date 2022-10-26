@@ -16,13 +16,12 @@
 //! * Traffic analysis
 //! * Access controls
 
-use crate::Neutral;
 use http::Method;
 use hyper::Body;
 use neutral_types::ip_info::IpInfoResponse;
 use std::net::IpAddr;
 
-use crate::error::Error;
+use crate::{Error, Neutral};
 
 #[cfg(test)]
 use mockito;
